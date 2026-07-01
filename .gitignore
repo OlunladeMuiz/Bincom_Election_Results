@@ -3,7 +3,6 @@ __pycache__/
 *.pyc
 *.pyo
 .DS_Store
-requirements.txt
 server-smoke.err.log
 server-smoke.out.log
 server.err.log
