@@ -32,29 +32,31 @@
     <h2>{{ selected_unit }}</h2>
     <span>{{ results | length }} parties</span>
   </div>
-  <div class="card" style="padding: 0; overflow: hidden;">
-    <table>
-      <thead>
-        <tr>
-          <th>Party</th>
-          <th>Votes</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% set total = namespace(val=0) %}
-        {% for row in results %}
-          {% set total.val = total.val + row.party_score %}
+  <div class="card table-card">
+    <div class="table-scroll">
+      <table>
+        <thead>
           <tr>
-            <td>{{ row.party_abbreviation }}</td>
-            <td>{{ "{:,}".format(row.party_score) }}</td>
+            <th>Party</th>
+            <th>Votes</th>
           </tr>
-        {% endfor %}
-        <tr class="total-row">
-          <td>TOTAL</td>
-          <td>{{ "{:,}".format(total.val) }}</td>
-        </tr>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% set total = namespace(val=0) %}
+          {% for row in results %}
+            {% set total.val = total.val + row.party_score %}
+            <tr>
+              <td>{{ row.party_abbreviation }}</td>
+              <td>{{ "{:,}".format(row.party_score) }}</td>
+            </tr>
+          {% endfor %}
+          <tr class="total-row">
+            <td>TOTAL</td>
+            <td>{{ "{:,}".format(total.val) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 {% endif %}
 {% endblock %}

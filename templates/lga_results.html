@@ -32,29 +32,31 @@
     <h2>{{ selected_lga }}</h2>
     <span>Summed from all polling units</span>
   </div>
-  <div class="card" style="padding: 0; overflow: hidden;">
-    <table>
-      <thead>
-        <tr>
-          <th>Party</th>
-          <th>Total Votes</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% set total = namespace(val=0) %}
-        {% for row in results %}
-          {% set total.val = total.val + row.total_score %}
+  <div class="card table-card">
+    <div class="table-scroll">
+      <table>
+        <thead>
           <tr>
-            <td>{{ row.party_abbreviation }}</td>
-            <td>{{ "{:,}".format(row.total_score) }}</td>
+            <th>Party</th>
+            <th>Total Votes</th>
           </tr>
-        {% endfor %}
-        <tr class="total-row">
-          <td>TOTAL</td>
-          <td>{{ "{:,}".format(total.val) }}</td>
-        </tr>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% set total = namespace(val=0) %}
+          {% for row in results %}
+            {% set total.val = total.val + row.total_score %}
+            <tr>
+              <td>{{ row.party_abbreviation }}</td>
+              <td>{{ "{:,}".format(row.total_score) }}</td>
+            </tr>
+          {% endfor %}
+          <tr class="total-row">
+            <td>TOTAL</td>
+            <td>{{ "{:,}".format(total.val) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 {% endif %}
 {% endblock %}
