@@ -63,6 +63,7 @@ def polling_unit_page(request: Request, unit_id: Optional[str] = None):
                 (unit_key,)
             )
             match = [u for u in polling_units if str(u.get("uniqueid")) == unit_key]
+            selected_unit = (match[0].get("polling_unit_label") or f"Unit {unit_key}") if match else f"Unit {unit_key}"
             selected_unit = (match[0].get("polling_unit_label") or unit_key) if match else unit_key
             if not results and not error:
                 error = "No results found for this polling unit."

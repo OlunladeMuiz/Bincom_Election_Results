@@ -10,7 +10,7 @@
 <div class="card">
   <form method="get" action="/lga-results">
     <label for="lga_id">Select Local Government Area</label>
-    <select name="lga_id" id="lga_id" data-enhanced-select onchange="this.form.submit()">
+    <select name="lga_id" id="lga_id" data-enhanced-select>
       <option value="">-- Choose an LGA --</option>
       {% for lga in lgas %}
         <option value="{{ lga.lga_id }}"
@@ -33,7 +33,6 @@
     <span>Summed from all polling units</span>
   </div>
   <div class="card" style="padding: 0; overflow: hidden;">
-    <div class="table-wrap">
     <table>
       <thead>
         <tr>
@@ -56,7 +55,6 @@
         </tr>
       </tbody>
     </table>
-  </div>
   </div>
 {% endif %}
 {% endblock %}
