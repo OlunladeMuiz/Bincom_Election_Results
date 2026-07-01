@@ -1,7 +1,53 @@
 import os
+from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv()
+
+SCHEMA_DUMP_PATH = Path(__file__).resolve().parent / "bincom_test_converted.sql"
+
+
+def bootstrap_schema_from_dump() -> None:
+    """
+    Execute the converted PostgreSQL dump against the configured database.
+
+    Skips execution if the `polling_unit` table already exists so that
+    re-deploys do not wipe and re-import data unnecessarily.
+    """
+    psycopg2_module, _ = _load_psycopg2()
+
+    conn = psycopg2_module.connect(
+        host=os.getenv("DB_HOST", "localhost"),
+        port=os.getenv("DB_PORT", "5432"),
+        dbname=os.getenv("DB_NAME", "bincom_test"),
+        user=os.getenv("DB_USER", "postgres"),
+        password=os.getenv("DB_PASSWORD", ""),
+    )
+    conn.autocommit = True
+
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM information_schema.tables
+                    WHERE table_schema = 'public'
+                      AND table_name   = 'polling_unit'
+                )
+                """
+            )
+            already_loaded: bool = cur.fetchone()[0]
+
+        if already_loaded:
+            return
+
+        sql = SCHEMA_DUMP_PATH.read_text(encoding="utf-8")
+        with conn.cursor() as cur:
+            cur.execute(sql)
+    finally:
+        conn.close()
 
 
 def _load_psycopg2():
