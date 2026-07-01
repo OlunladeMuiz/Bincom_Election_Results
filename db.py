@@ -1,7 +1,10 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
+
+SCHEMA_DUMP_PATH = Path(__file__).resolve().parent / "bincom_test_converted.sql"
 
 
 def _load_psycopg2():
@@ -24,6 +27,47 @@ def get_connection():
         user=os.getenv("DB_USER", "postgres"),
         password=os.getenv("DB_PASSWORD", ""),
     )
+
+
+def bootstrap_schema_from_dump():
+    conn = None
+    cur = None
+    try:
+        _, psycopg2_extras_module = _load_psycopg2()
+        conn = get_connection()
+        cur = conn.cursor(cursor_factory=psycopg2_extras_module.RealDictCursor)
+
+        cur.execute(
+            """
+            SELECT
+                to_regclass('public.polling_unit') AS polling_unit,
+                to_regclass('public.lga') AS lga,
+                to_regclass('public.party') AS party,
+                to_regclass('public.announced_pu_results') AS announced_pu_results,
+                to_regclass('public.ward') AS ward,
+                to_regclass('public.states') AS states
+            """
+        )
+        schema_row = cur.fetchone() or {}
+        if all(schema_row.values()):
+            conn.commit()
+            return False
+
+        if not SCHEMA_DUMP_PATH.exists():
+            raise RuntimeError(f"Schema dump not found at {SCHEMA_DUMP_PATH}")
+
+        cur.execute(SCHEMA_DUMP_PATH.read_text(encoding="utf-8"))
+        conn.commit()
+        return True
+    except Exception as e:
+        if conn is not None:
+            conn.rollback()
+        raise RuntimeError(f"Database bootstrap failed: {e}") from e
+    finally:
+        if cur is not None:
+            cur.close()
+        if conn is not None:
+            conn.close()
 
 
 def fetch_all(query: str, params: tuple = ()):
