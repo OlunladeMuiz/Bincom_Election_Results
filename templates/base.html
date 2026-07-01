@@ -10,16 +10,16 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --green: #1a6b3c;
+      --green:      #1a6b3c;
       --green-dark: #0f4526;
-      --green-light: #e8f5ee;
-      --ink: #111;
-      --muted: #555;
-      --border: #d4d4d4;
-      --bg: #f7f6f2;
-      --white: #fff;
-      --red: #b91c1c;
-      --gold: #b45309;
+      --green-light:#e8f5ee;
+      --ink:        #111;
+      --muted:      #555;
+      --border:     #d4d4d4;
+      --bg:         #f7f6f2;
+      --white:      #fff;
+      --red:        #b91c1c;
+      --nav-height: 56px;
       color-scheme: light;
     }
 
@@ -30,47 +30,194 @@
       min-height: 100vh;
     }
 
+    /* ── NAV ──────────────────────────────────────────────────────────────── */
+
     nav {
       background: var(--green-dark);
       padding: 0 2rem;
       display: flex;
       align-items: center;
       gap: 2rem;
-      height: 56px;
+      height: var(--nav-height);
+      position: relative;   /* drawer is absolute inside nav */
+      z-index: 100;
     }
 
-    nav .brand {
+    .nav__brand {
       font-family: 'DM Serif Display', serif;
       color: var(--white);
       font-size: 1.1rem;
       letter-spacing: 0.01em;
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
-    nav .brand span {
-      color: #6ee7a0;
+    .nav__brand span { color: #6ee7a0; }
+
+    /* Inline link group — always in DOM, hidden via CSS at mobile */
+    .nav__links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      flex: 1;
     }
 
-    nav a {
+    .nav__links a {
       color: rgba(255,255,255,0.75);
       text-decoration: none;
       font-size: 0.875rem;
       font-weight: 500;
       padding: 0.25rem 0;
       border-bottom: 2px solid transparent;
+      white-space: nowrap;
       transition: color 0.15s, border-color 0.15s;
     }
 
-    nav a:hover, nav a.active {
+    .nav__links a:hover,
+    .nav__links a.active {
       color: #fff;
       border-bottom-color: #6ee7a0;
     }
+
+    /* ── HAMBURGER ────────────────────────────────────────────────────────── */
+
+    .nav__hamburger {
+      /* always in DOM; only visible via media query */
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      width: 40px;
+      height: 40px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+      margin-left: auto;
+      flex-shrink: 0;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+
+    .nav__hamburger:hover { background: rgba(255,255,255,0.1); }
+
+    .nav__hamburger:focus-visible {
+      outline: 2px solid #6ee7a0;
+      outline-offset: 2px;
+    }
+
+    .nav__bar {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: #fff;
+      border-radius: 2px;
+      /* gap=5px, bar-height=2px → total span = 5+2+5+2 = 14px centre-to-centre = 7px */
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      transform-origin: center;
+    }
+
+    /* X state — driven by aria-expanded so JS + CSS stay in sync */
+    .nav__hamburger[aria-expanded="true"] .nav__bar:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+    .nav__hamburger[aria-expanded="true"] .nav__bar:nth-child(2) {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+    .nav__hamburger[aria-expanded="true"] .nav__bar:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    /* ── DRAWER ───────────────────────────────────────────────────────────── */
+
+    /*
+      Drawer is ALWAYS in the DOM and ALWAYS styled — never display:none.
+      Visibility is controlled purely by max-height + opacity + pointer-events.
+      This avoids the CSS media-query / JS mismatch bug from the previous version
+      and lets transitions run correctly on every resize.
+    */
+    .nav__drawer {
+      position: absolute;
+      top: var(--nav-height);
+      left: 0;
+      right: 0;
+      background: var(--green-dark);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      z-index: 99;
+
+      /* closed state */
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transition: max-height 0.3s ease, opacity 0.25s ease;
+    }
+
+    .nav__drawer.is-open {
+      max-height: 240px;   /* 3 links × ~56px each + padding; safe upper bound */
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .nav__drawer-inner {
+      display: flex;
+      flex-direction: column;
+      padding: 0.5rem 0;
+    }
+
+    .nav__drawer-inner a {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 0.85rem 1.25rem;
+      border-left: 3px solid transparent;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .nav__drawer-inner a:hover,
+    .nav__drawer-inner a.active {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      border-left-color: #6ee7a0;
+    }
+
+    /* ── RESPONSIVE NAV ───────────────────────────────────────────────────── */
+
+    @media (max-width: 768px) {
+      nav { padding: 0 1.25rem; gap: 1.25rem; }
+      .nav__links a { font-size: 0.825rem; }
+    }
+
+    @media (max-width: 560px) {
+      nav { padding: 0 1rem; gap: 1rem; }
+      .nav__brand { font-size: 1rem; }
+    }
+
+    /* At 420px: hide inline links, show hamburger */
+    @media (max-width: 420px) {
+      nav { gap: 0; justify-content: space-between; }
+      .nav__links { display: none; }
+      .nav__hamburger { display: flex; }
+    }
+
+    /* ── PAGE ─────────────────────────────────────────────────────────────── */
 
     .page {
       max-width: 860px;
       margin: 0 auto;
       padding: 2.5rem 1.5rem;
     }
+
+    @media (max-width: 768px) { .page { padding: 2rem 1.25rem; } }
+    @media (max-width: 480px) { .page { padding: 1.5rem 1rem; } }
+    @media (max-width: 360px) { .page { padding: 1.25rem 0.75rem; } }
+
+    /* ── PAGE HEADER ──────────────────────────────────────────────────────── */
 
     .page-header {
       margin-bottom: 2rem;
@@ -91,6 +238,17 @@
       font-size: 0.9rem;
     }
 
+    @media (max-width: 480px) {
+      .page-header { margin-bottom: 1.5rem; }
+      .page-header h1 { font-size: 1.45rem; }
+    }
+
+    @media (max-width: 360px) {
+      .page-header h1 { font-size: 1.25rem; }
+    }
+
+    /* ── CARD ─────────────────────────────────────────────────────────────── */
+
     .card {
       background: var(--white);
       border: 1px solid var(--border);
@@ -98,6 +256,11 @@
       padding: 1.5rem;
       margin-bottom: 1.5rem;
     }
+
+    @media (max-width: 480px) { .card { padding: 1.25rem 1rem; } }
+    @media (max-width: 360px) { .card { padding: 1rem 0.75rem; border-radius: 4px; } }
+
+    /* ── FORM ELEMENTS ────────────────────────────────────────────────────── */
 
     label {
       display: block;
@@ -109,7 +272,9 @@
       margin-bottom: 0.4rem;
     }
 
-    select, input[type="number"], input[type="text"] {
+    select,
+    input[type="number"],
+    input[type="text"] {
       width: 100%;
       padding: 0.6rem 0.75rem;
       border: 1px solid var(--border);
@@ -118,7 +283,6 @@
       font-size: 0.95rem;
       background: var(--white);
       color: var(--ink);
-      color-scheme: light;
       transition: border-color 0.15s;
     }
 
@@ -126,31 +290,32 @@
       cursor: pointer;
       color: #0f172a;
       font-weight: 600;
-      background-color: var(--white);
     }
 
-    select option {
-      color: #0f172a;
-      background-color: #ffffff;
-      font-weight: 500;
-    }
-
+    select option            { color: #0f172a; background: #fff; font-weight: 500; }
     select option:checked,
     select option:focus,
-    select option:active {
-      background-color: var(--green-dark);
-      color: #ffffff;
-    }
+    select option:active     { background: var(--green-dark); color: #fff; }
+    select option:disabled   { color: #94a3b8; }
 
-    select option:disabled {
-      color: #94a3b8;
-    }
-
-    select:focus, input:focus {
+    select:focus,
+    input:focus {
       outline: none;
       border-color: var(--green);
-      box-shadow: 0 0 0 3px rgba(26, 107, 60, 0.12);
+      box-shadow: 0 0 0 3px rgba(26,107,60,0.12);
     }
+
+    /* font-size ≥ 16px on mobile prevents iOS auto-zoom on focus */
+    @media (max-width: 480px) {
+      select,
+      input[type="number"],
+      input[type="text"] {
+        padding: 0.75rem;
+        font-size: 1rem;
+      }
+    }
+
+    /* ── BUTTON ───────────────────────────────────────────────────────────── */
 
     .btn {
       display: inline-block;
@@ -168,6 +333,18 @@
     }
 
     .btn:hover { background: var(--green-dark); }
+
+    @media (max-width: 480px) {
+      .btn {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 0.85rem 1rem;
+        font-size: 1rem;
+      }
+    }
+
+    /* ── ALERTS ───────────────────────────────────────────────────────────── */
 
     .error-box {
       background: #fef2f2;
@@ -189,16 +366,27 @@
       margin-bottom: 1.25rem;
     }
 
+    /* ── TABLE ────────────────────────────────────────────────────────────── */
+
+    /*
+      .table-wrap must be added in child templates around every <table>.
+      It provides horizontal scroll on narrow screens without breaking layout.
+    */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 6px;
+    }
+
     table {
       width: 100%;
+      min-width: 280px;
       border-collapse: collapse;
       font-size: 0.9rem;
     }
 
-    thead tr {
-      background: var(--green-dark);
-      color: #fff;
-    }
+    thead tr { background: var(--green-dark); color: #fff; }
 
     thead th {
       padding: 0.65rem 1rem;
@@ -207,6 +395,7 @@
       font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      white-space: nowrap;
     }
 
     tbody tr:nth-child(even) { background: var(--green-light); }
@@ -223,10 +412,22 @@
       border-top: 2px solid var(--green);
     }
 
+    @media (max-width: 480px) {
+      thead th, tbody td { padding: 0.55rem 0.75rem; font-size: 0.85rem; }
+    }
+
+    @media (max-width: 360px) {
+      thead th, tbody td { padding: 0.5rem 0.6rem; font-size: 0.8rem; }
+    }
+
+    /* ── RESULT HEADER ────────────────────────────────────────────────────── */
+
     .result-header {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0.5rem;
       margin-bottom: 0.75rem;
     }
 
@@ -236,10 +437,9 @@
       color: var(--green-dark);
     }
 
-    .result-header span {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
+    .result-header span { font-size: 0.8rem; color: var(--muted); }
+
+    /* ── PARTY GRID ───────────────────────────────────────────────────────── */
 
     .party-grid {
       display: grid;
@@ -248,25 +448,23 @@
       margin-bottom: 1.25rem;
     }
 
-    .party-input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
+    @media (max-width: 480px) {
+      .party-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
     }
 
-    .party-input-group label {
-      color: var(--green-dark);
-      font-size: 0.75rem;
+    @media (max-width: 360px) {
+      .party-grid { grid-template-columns: 1fr; }
     }
 
-    .enhanced-select {
-      position: relative;
-      width: 100%;
-    }
+    .party-input-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .party-input-group label { color: var(--green-dark); font-size: 0.75rem; }
 
-    .enhanced-select--ready > select[data-enhanced-select] {
-      display: none;
-    }
+    /* ── ENHANCED SELECT ──────────────────────────────────────────────────── */
+
+    .enhanced-select { position: relative; width: 100%; }
+
+    /* JS adds enhanced-select--ready; only then hide the native select */
+    .enhanced-select--ready > select[data-enhanced-select] { display: none; }
 
     .enhanced-select__button {
       width: 100%;
@@ -285,27 +483,22 @@
       font-weight: 600;
       text-align: left;
       cursor: pointer;
-      transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
 
-    .enhanced-select__button:hover {
-      border-color: var(--green);
-    }
+    .enhanced-select__button:hover              { border-color: var(--green); }
 
     .enhanced-select__button:focus-visible {
       outline: none;
       border-color: var(--green);
-      box-shadow: 0 0 0 3px rgba(26, 107, 60, 0.12);
+      box-shadow: 0 0 0 3px rgba(26,107,60,0.12);
     }
 
-    .enhanced-select__button.is-placeholder {
-      color: var(--muted);
-      font-weight: 500;
-    }
+    .enhanced-select__button.is-placeholder     { color: var(--muted); font-weight: 500; }
 
     .enhanced-select__button.is-invalid {
       border-color: var(--red);
-      box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12);
+      box-shadow: 0 0 0 3px rgba(185,28,28,0.12);
     }
 
     .enhanced-select__value {
@@ -342,12 +535,10 @@
       background: var(--white);
       border: 1px solid var(--border);
       border-radius: 8px;
-      box-shadow: 0 16px 40px rgba(15, 69, 38, 0.14);
+      box-shadow: 0 16px 40px rgba(15,69,38,0.14);
     }
 
-    .enhanced-select.is-open .enhanced-select__panel {
-      display: block;
-    }
+    .enhanced-select.is-open .enhanced-select__panel { display: block; }
 
     .enhanced-select__option {
       width: 100%;
@@ -373,133 +564,238 @@
 
     .enhanced-select__option[aria-selected="true"] {
       background: var(--green-dark);
-      color: #ffffff;
+      color: #fff;
       font-weight: 600;
     }
 
-    .enhanced-select__option[data-placeholder="true"] {
-      color: var(--muted);
-    }
+    .enhanced-select__option[data-placeholder="true"] { color: var(--muted); }
 
-    .enhanced-select__option:disabled {
-      color: #94a3b8;
-      cursor: not-allowed;
-    }
-
+    .enhanced-select__option:disabled                   { color: #94a3b8; cursor: not-allowed; }
     .enhanced-select__option:disabled:hover,
-    .enhanced-select__option:disabled:focus-visible {
-      background: transparent;
-      color: #94a3b8;
+    .enhanced-select__option:disabled:focus-visible     { background: transparent; color: #94a3b8; }
+
+    @media (max-width: 480px) {
+      .enhanced-select__button { min-height: 48px; font-size: 1rem; }
+      .enhanced-select__option { padding: 0.85rem 0.8rem; font-size: 1rem; }
+    }
+
+    /* ── REDUCED MOTION ───────────────────────────────────────────────────── */
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
     }
   </style>
 </head>
 <body>
+
   <nav>
-    <div class="brand">INEC <span>Delta</span> 2011</div>
-    <a href="/" {% if request.url.path == "/" %}class="active"{% endif %}>Polling Unit Results</a>
-    <a href="/lga-results" {% if request.url.path == "/lga-results" %}class="active"{% endif %}>LGA Totals</a>
-    <a href="/add-result" {% if request.url.path == "/add-result" %}class="active"{% endif %}>Add Results</a>
+    <div class="nav__brand">INEC <span>Delta</span> 2011</div>
+
+    <!-- Inline links — visible above 420px via CSS -->
+    <div class="nav__links">
+      <a href="/" {% if request.url.path == "/" %}class="active"{% endif %}>Polling Unit Results</a>
+      <a href="/lga-results" {% if request.url.path == "/lga-results" %}class="active"{% endif %}>LGA Totals</a>
+      <a href="/add-result" {% if request.url.path == "/add-result" %}class="active"{% endif %}>Add Results</a>
+    </div>
+
+    <!--
+      Hamburger — always in DOM; CSS shows it only at ≤420px.
+      aria-expanded is the single source of truth for both the CSS animation
+      and the JS open/close state.
+    -->
+    <button
+      class="nav__hamburger"
+      id="nav-hamburger"
+      type="button"
+      aria-label="Open navigation menu"
+      aria-expanded="false"
+      aria-controls="nav-drawer"
+    >
+      <span class="nav__bar"></span>
+      <span class="nav__bar"></span>
+      <span class="nav__bar"></span>
+    </button>
+
+    <!--
+      Drawer — always in DOM, always styled.
+      Visibility is max-height/opacity/pointer-events only — never display:none.
+      This means transitions always fire regardless of viewport size or resize events.
+    -->
+    <div class="nav__drawer" id="nav-drawer" role="navigation" aria-label="Mobile navigation" aria-hidden="true">
+      <div class="nav__drawer-inner">
+        <a href="/" {% if request.url.path == "/" %}class="active"{% endif %}>Polling Unit Results</a>
+        <a href="/lga-results" {% if request.url.path == "/lga-results" %}class="active"{% endif %}>LGA Totals</a>
+        <a href="/add-result" {% if request.url.path == "/add-result" %}class="active"{% endif %}>Add Results</a>
+      </div>
+    </div>
   </nav>
+
   <div class="page">
     {% block content %}{% endblock %}
   </div>
+
   <script>
+    /* ── HAMBURGER ────────────────────────────────────────────────────────────
+       Fix: JS is guarded by matchMedia so it only runs at ≤420px.
+       If the user resizes above 420px while the drawer is open, a resize
+       listener closes it automatically and resets ARIA state.
+       The Escape-key handler lives ONLY here — the enhanced-select IIFE
+       no longer shares a keydown handler for Escape at document level,
+       eliminating the double-fire conflict.
+    ─────────────────────────────────────────────────────────────────────────*/
     (() => {
-      const instances = [];
+      const btn    = document.getElementById('nav-hamburger');
+      const drawer = document.getElementById('nav-drawer');
+      if (!btn || !drawer) return;
+
+      const MQ = window.matchMedia('(max-width: 420px)');
+
+      function isOpen() {
+        return btn.getAttribute('aria-expanded') === 'true';
+      }
+
+      function open() {
+        drawer.classList.add('is-open');
+        drawer.setAttribute('aria-hidden', 'false');
+        btn.setAttribute('aria-expanded', 'true');
+        btn.setAttribute('aria-label', 'Close navigation menu');
+      }
+
+      function close(options = {}) {
+        drawer.classList.remove('is-open');
+        drawer.setAttribute('aria-hidden', 'true');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.setAttribute('aria-label', 'Open navigation menu');
+        if (options.focusBtn) btn.focus({ preventScroll: true });
+      }
+
+      /* toggle on click */
+      btn.addEventListener('click', () => { isOpen() ? close() : open(); });
+
+      /* Escape closes drawer and returns focus to button */
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isOpen()) {
+          e.stopPropagation(); /* prevent bubbling to any other Escape handler */
+          close({ focusBtn: true });
+        }
+      });
+
+      /* Outside click — only when drawer is open */
+      document.addEventListener('click', (e) => {
+        if (isOpen() && !btn.contains(e.target) && !drawer.contains(e.target)) {
+          close();
+        }
+      });
+
+      /* Tapping a drawer link navigates — close immediately */
+      drawer.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => close());
+      });
+
+      /* Resize guard: if viewport grows above 420px while drawer is open, close it.
+         This fixes the stale-open-drawer-on-resize bug. */
+      MQ.addEventListener('change', (e) => {
+        if (!e.matches && isOpen()) close();
+      });
+    })();
+
+
+    /* ── ENHANCED SELECT ──────────────────────────────────────────────────────
+       Escape key is handled at the instance/wrapper level only — NOT at
+       document level — so it no longer conflicts with the hamburger handler.
+    ─────────────────────────────────────────────────────────────────────────*/
+    (() => {
+      const instances          = [];
       const formsWithValidation = new WeakSet();
-      let openInstance = null;
+      let openInstance         = null;
+
+      /* ── helpers ── */
 
       function closeInstance(instance, options = {}) {
         if (!instance) return;
         instance.wrapper.classList.remove('is-open');
         instance.panel.hidden = true;
         instance.button.setAttribute('aria-expanded', 'false');
-        if (openInstance === instance) {
-          openInstance = null;
-        }
-        if (options.focusButton) {
-          instance.button.focus({ preventScroll: true });
-        }
+        if (openInstance === instance) openInstance = null;
+        if (options.focusButton) instance.button.focus({ preventScroll: true });
       }
 
       function openInstanceMenu(instance) {
-        if (openInstance && openInstance !== instance) {
-          closeInstance(openInstance);
-        }
+        if (openInstance && openInstance !== instance) closeInstance(openInstance);
         instance.wrapper.classList.add('is-open');
         instance.panel.hidden = false;
         instance.button.setAttribute('aria-expanded', 'true');
         openInstance = instance;
 
-        const selectedButton = instance.optionButtons.find((button) => button.dataset.value === instance.select.value && !button.disabled);
-        const firstChoiceButton = instance.optionButtons.find((button) => !button.disabled && button.dataset.value);
-        const firstButton = instance.optionButtons.find((button) => !button.disabled);
-        const targetButton = instance.required && !instance.select.value ? firstChoiceButton || firstButton : selectedButton || firstButton;
+        const selected     = instance.optionButtons.find(b => b.dataset.value === instance.select.value && !b.disabled);
+        const firstChoice  = instance.optionButtons.find(b => !b.disabled && b.dataset.value);
+        const first        = instance.optionButtons.find(b => !b.disabled);
+        const target       = (instance.required && !instance.select.value)
+          ? (firstChoice || first)
+          : (selected || first);
 
-        if (targetButton) {
-          requestAnimationFrame(() => targetButton.focus({ preventScroll: true }));
-        }
+        if (target) requestAnimationFrame(() => target.focus({ preventScroll: true }));
       }
 
       function syncInstance(instance) {
         const selectedOption = instance.select.selectedOptions[0] || instance.select.options[0];
-        const isPlaceholder = !instance.select.value;
+        const isPlaceholder  = !instance.select.value;
 
-        instance.value.textContent = selectedOption ? selectedOption.textContent.trim() : instance.placeholderText;
+        instance.value.textContent = selectedOption
+          ? selectedOption.textContent.trim()
+          : instance.placeholderText;
+
         instance.button.classList.toggle('is-placeholder', isPlaceholder);
-        instance.button.classList.toggle('is-invalid', instance.invalid);
+        instance.button.classList.toggle('is-invalid',     instance.invalid);
         instance.button.setAttribute('aria-invalid', instance.invalid ? 'true' : 'false');
 
-        instance.optionButtons.forEach((button) => {
-          const selected = button.dataset.value === instance.select.value;
-          button.setAttribute('aria-selected', selected ? 'true' : 'false');
+        instance.optionButtons.forEach(b => {
+          b.setAttribute('aria-selected', b.dataset.value === instance.select.value ? 'true' : 'false');
         });
       }
 
-      function moveFocus(instance, currentButton, direction) {
-        const enabledButtons = instance.optionButtons.filter((button) => !button.disabled);
-        const currentIndex = enabledButtons.indexOf(currentButton);
-        const nextIndex = currentIndex === -1 ? 0 : Math.max(0, Math.min(enabledButtons.length - 1, currentIndex + direction));
-        const target = enabledButtons[nextIndex];
-
-        if (target) {
-          target.focus({ preventScroll: true });
-        }
+      function moveFocus(instance, currentBtn, direction) {
+        const enabled = instance.optionButtons.filter(b => !b.disabled);
+        const idx     = enabled.indexOf(currentBtn);
+        const clamped = Math.max(0, Math.min(enabled.length - 1, (idx === -1 ? 0 : idx) + direction));
+        enabled[clamped]?.focus({ preventScroll: true });
       }
 
-      function buildSelect(select) {
-        if (!(select instanceof HTMLSelectElement) || select.dataset.enhancedBuilt === 'true') {
-          return;
-        }
+      /* ── build ── */
 
-        const label = select.labels && select.labels.length ? select.labels[0] : null;
-        const form = select.form;
+      function buildSelect(select) {
+        if (!(select instanceof HTMLSelectElement) || select.dataset.enhancedBuilt === 'true') return;
+
+        const lbl    = select.labels?.length ? select.labels[0] : null;
+        const form   = select.form;
+
         const wrapper = document.createElement('div');
         wrapper.className = 'enhanced-select';
-
         select.parentNode.insertBefore(wrapper, select);
         wrapper.appendChild(select);
 
-        const baseId = select.id || `enhanced-select-${instances.length + 1}`;
-        const valueId = `${baseId}-value`;
-        const listboxId = `${baseId}-listbox`;
-        const buttonId = `${baseId}-button`;
+        const baseId    = select.id || `esel-${instances.length + 1}`;
+        const valueId   = `${baseId}-val`;
+        const listboxId = `${baseId}-lb`;
+        const buttonId  = `${baseId}-btn`;
 
-        if (label) {
-          label.htmlFor = buttonId;
-        }
+        if (lbl) lbl.htmlFor = buttonId;
 
+        /* button */
         const button = document.createElement('button');
-        button.type = 'button';
+        button.type      = 'button';
         button.className = 'enhanced-select__button';
-        button.id = buttonId;
-        button.setAttribute('aria-haspopup', 'listbox');
-        button.setAttribute('aria-expanded', 'false');
-        button.setAttribute('aria-controls', listboxId);
+        button.id        = buttonId;
+        button.setAttribute('aria-haspopup',  'listbox');
+        button.setAttribute('aria-expanded',  'false');
+        button.setAttribute('aria-controls',  listboxId);
 
         const value = document.createElement('span');
         value.className = 'enhanced-select__value';
-        value.id = valueId;
+        value.id        = valueId;
 
         const chevron = document.createElement('span');
         chevron.className = 'enhanced-select__chevron';
@@ -507,30 +803,26 @@
 
         button.append(value, chevron);
 
+        /* panel */
         const panel = document.createElement('div');
         panel.className = 'enhanced-select__panel';
-        panel.id = listboxId;
+        panel.id        = listboxId;
         panel.setAttribute('role', 'listbox');
-        panel.hidden = true;
+        panel.hidden    = true;
 
         const instance = {
-          select,
-          wrapper,
-          button,
-          value,
-          panel,
-          optionButtons: [],
-          placeholderText: select.options[0] ? select.options[0].textContent.trim() : 'Select an option',
-          required: select.required,
-          invalid: false,
+          select, wrapper, button, value, panel,
+          optionButtons:   [],
+          placeholderText: select.options[0]?.textContent.trim() ?? 'Select an option',
+          required:        select.required,
+          invalid:         false,
           form,
         };
 
-        if (label) {
-          if (!label.id) {
-            label.id = `${baseId}-label`;
-          }
-          button.setAttribute('aria-labelledby', `${label.id} ${valueId}`);
+        /* labelling */
+        if (lbl) {
+          if (!lbl.id) lbl.id = `${baseId}-lbl`;
+          button.setAttribute('aria-labelledby', `${lbl.id} ${valueId}`);
         } else {
           button.setAttribute('aria-labelledby', valueId);
         }
@@ -540,26 +832,24 @@
           select.removeAttribute('required');
         }
 
-        select.hidden = true;
+        select.hidden    = true;
         select.setAttribute('aria-hidden', 'true');
-        select.tabIndex = -1;
+        select.tabIndex  = -1;
         select.dataset.enhancedBuilt = 'true';
 
-        [...select.options].forEach((option, index) => {
-          const optionButton = document.createElement('button');
-          optionButton.type = 'button';
-          optionButton.className = 'enhanced-select__option';
-          optionButton.setAttribute('role', 'option');
-          optionButton.dataset.value = option.value;
-          optionButton.textContent = option.textContent.trim();
-          optionButton.disabled = option.disabled;
+        /* option buttons */
+        [...select.options].forEach(option => {
+          const optBtn = document.createElement('button');
+          optBtn.type      = 'button';
+          optBtn.className = 'enhanced-select__option';
+          optBtn.setAttribute('role', 'option');
+          optBtn.dataset.value = option.value;
+          optBtn.textContent   = option.textContent.trim();
+          optBtn.disabled      = option.disabled;
+          if (!option.value) optBtn.dataset.placeholder = 'true';
 
-          if (!option.value) {
-            optionButton.dataset.placeholder = 'true';
-          }
-
-          optionButton.addEventListener('click', () => {
-            if (optionButton.disabled) return;
+          optBtn.addEventListener('click', () => {
+            if (optBtn.disabled) return;
             select.value = option.value;
             instance.invalid = false;
             syncInstance(instance);
@@ -567,76 +857,78 @@
             closeInstance(instance, { focusButton: true });
           });
 
-          optionButton.addEventListener('keydown', (event) => {
-            if (event.key === 'ArrowDown') {
-              event.preventDefault();
-              moveFocus(instance, optionButton, 1);
-            } else if (event.key === 'ArrowUp') {
-              event.preventDefault();
-              if (index === 0) {
-                instance.button.focus({ preventScroll: true });
-              } else {
-                moveFocus(instance, optionButton, -1);
-              }
-            } else if (event.key === 'Home') {
-              event.preventDefault();
-              const firstEnabled = instance.optionButtons.find((button) => !button.disabled);
-              if (firstEnabled) {
-                firstEnabled.focus({ preventScroll: true });
-              }
-            } else if (event.key === 'End') {
-              event.preventDefault();
-              const lastEnabled = [...instance.optionButtons].reverse().find((button) => !button.disabled);
-              if (lastEnabled) {
-                lastEnabled.focus({ preventScroll: true });
-              }
-            } else if (event.key === 'Escape') {
-              event.preventDefault();
-              closeInstance(instance, { focusButton: true });
-            } else if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault();
-              optionButton.click();
+          optBtn.addEventListener('keydown', e => {
+            const enabled = instance.optionButtons.filter(b => !b.disabled);
+            switch (e.key) {
+              case 'ArrowDown':
+                e.preventDefault();
+                moveFocus(instance, optBtn, 1);
+                break;
+              case 'ArrowUp':
+                e.preventDefault();
+                enabled.indexOf(optBtn) === 0
+                  ? instance.button.focus({ preventScroll: true })
+                  : moveFocus(instance, optBtn, -1);
+                break;
+              case 'Home':
+                e.preventDefault();
+                enabled[0]?.focus({ preventScroll: true });
+                break;
+              case 'End':
+                e.preventDefault();
+                enabled[enabled.length - 1]?.focus({ preventScroll: true });
+                break;
+              case 'Escape':
+                e.preventDefault();
+                e.stopPropagation(); /* don't let Escape reach the hamburger handler */
+                closeInstance(instance, { focusButton: true });
+                break;
+              case 'Enter':
+              case ' ':
+                e.preventDefault();
+                optBtn.click();
+                break;
             }
           });
 
-          panel.appendChild(optionButton);
-          instance.optionButtons.push(optionButton);
+          panel.appendChild(optBtn);
+          instance.optionButtons.push(optBtn);
         });
 
+        /* button interactions */
         button.addEventListener('click', () => {
-          if (wrapper.classList.contains('is-open')) {
-            closeInstance(instance);
-          } else {
-            openInstanceMenu(instance);
+          wrapper.classList.contains('is-open')
+            ? closeInstance(instance)
+            : openInstanceMenu(instance);
+        });
+
+        button.addEventListener('keydown', e => {
+          switch (e.key) {
+            case 'Escape':
+              e.preventDefault();
+              e.stopPropagation(); /* same — don't leak to hamburger handler */
+              closeInstance(instance, { focusButton: true });
+              break;
+            case 'ArrowDown':
+            case 'Enter':
+            case ' ':
+              e.preventDefault();
+              if (!wrapper.classList.contains('is-open')) openInstanceMenu(instance);
+              break;
+            case 'ArrowUp':
+              if (!wrapper.classList.contains('is-open')) {
+                e.preventDefault();
+                openInstanceMenu(instance);
+                const last = [...instance.optionButtons].reverse().find(b => !b.disabled);
+                last?.focus({ preventScroll: true });
+              }
+              break;
           }
         });
 
-        button.addEventListener('keydown', (event) => {
-          if (event.key === 'Escape') {
-            event.preventDefault();
-            closeInstance(instance, { focusButton: true });
-            return;
-          }
-
-          if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            if (!wrapper.classList.contains('is-open')) {
-              openInstanceMenu(instance);
-            }
-          } else if (event.key === 'ArrowUp' && !wrapper.classList.contains('is-open')) {
-            event.preventDefault();
-            openInstanceMenu(instance);
-            const lastEnabled = [...instance.optionButtons].reverse().find((button) => !button.disabled);
-            if (lastEnabled) {
-              lastEnabled.focus({ preventScroll: true });
-            }
-          }
-        });
-
-        wrapper.addEventListener('focusout', (event) => {
-          if (!wrapper.contains(event.relatedTarget)) {
-            closeInstance(instance);
-          }
+        /* close on focus leaving the widget */
+        wrapper.addEventListener('focusout', e => {
+          if (!wrapper.contains(e.relatedTarget)) closeInstance(instance);
         });
 
         select.addEventListener('change', () => {
@@ -644,12 +936,13 @@
           syncInstance(instance);
         });
 
+        /* form validation */
         if (form && !formsWithValidation.has(form)) {
           formsWithValidation.add(form);
-          form.addEventListener('submit', (event) => {
-            const missing = instances.find((item) => item.form === form && item.required && !item.select.value);
+          form.addEventListener('submit', e => {
+            const missing = instances.find(i => i.form === form && i.required && !i.select.value);
             if (missing) {
-              event.preventDefault();
+              e.preventDefault();
               missing.invalid = true;
               syncInstance(missing);
               openInstanceMenu(missing);
@@ -663,20 +956,21 @@
         syncInstance(instance);
       }
 
+      /* ── init ── */
       document.querySelectorAll('select[data-enhanced-select]').forEach(buildSelect);
 
-      document.addEventListener('click', (event) => {
-        if (!openInstance) return;
-        if (!openInstance.wrapper.contains(event.target)) {
+      /* Outside click — close open select dropdown */
+      document.addEventListener('click', e => {
+        if (openInstance && !openInstance.wrapper.contains(e.target)) {
           closeInstance(openInstance);
         }
       });
 
-      document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && openInstance) {
-          closeInstance(openInstance, { focusButton: true });
-        }
-      });
+      /*
+        NO document-level Escape handler here.
+        Escape is handled at the button/option level with e.stopPropagation()
+        so it never conflicts with the hamburger's document-level handler.
+      */
     })();
   </script>
 </body>
