@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Bincom Election Results{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #1a6b3c;
+      --green-dark: #0f4526;
+      --green-light: #e8f5ee;
+      --ink: #111;
+      --muted: #555;
+      --border: #d4d4d4;
+      --bg: #f7f6f2;
+      --white: #fff;
+      --red: #b91c1c;
+      --gold: #b45309;
+      color-scheme: light;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    nav {
+      background: var(--green-dark);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      height: 56px;
+    }
+
+    nav .brand {
+      font-family: 'DM Serif Display', serif;
+      color: var(--white);
+      font-size: 1.1rem;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+
+    nav .brand span {
+      color: #6ee7a0;
+    }
+
+    nav a {
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.25rem 0;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    nav a:hover, nav a.active {
+      color: #fff;
+      border-bottom-color: #6ee7a0;
+    }
+
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--green);
+      padding-bottom: 1rem;
+    }
+
+    .page-header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.75rem;
+      color: var(--green-dark);
+      line-height: 1.2;
+    }
+
+    .page-header p {
+      margin-top: 0.4rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+
+    select, input[type="number"], input[type="text"] {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      background: var(--white);
+      color: var(--ink);
+      color-scheme: light;
+      transition: border-color 0.15s;
+    }
+
+    select {
+      cursor: pointer;
+      color: #0f172a;
+      font-weight: 600;
+      background-color: var(--white);
+    }
+
+    select option {
+      color: #0f172a;
+      background-color: #ffffff;
+      font-weight: 500;
+    }
+
+    select option:checked,
+    select option:focus,
+    select option:active {
+      background-color: var(--green-dark);
+      color: #ffffff;
+    }
+
+    select option:disabled {
+      color: #94a3b8;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(26, 107, 60, 0.12);
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.6rem 1.4rem;
+      background: var(--green);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 0.75rem;
+      transition: background 0.15s;
+    }
+
+    .btn:hover { background: var(--green-dark); }
+
+    .error-box {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: var(--red);
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .success-box {
+      background: var(--green-light);
+      border: 1px solid #86efac;
+      color: var(--green-dark);
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    thead tr {
+      background: var(--green-dark);
+      color: #fff;
+    }
+
+    thead th {
+      padding: 0.65rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    tbody tr:nth-child(even) { background: var(--green-light); }
+
+    tbody td {
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--ink);
+    }
+
+    .total-row td {
+      font-weight: 700;
+      background: #dcfce7;
+      border-top: 2px solid var(--green);
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.75rem;
+    }
+
+    .result-header h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      color: var(--green-dark);
+    }
+
+    .result-header span {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .party-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .party-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .party-input-group label {
+      color: var(--green-dark);
+      font-size: 0.75rem;
+    }
+
+    .enhanced-select {
+      position: relative;
+      width: 100%;
+    }
+
+    .enhanced-select--ready > select[data-enhanced-select] {
+      display: none;
+    }
+
+    .enhanced-select__button {
+      width: 100%;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--white);
+      color: #0f172a;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    }
+
+    .enhanced-select__button:hover {
+      border-color: var(--green);
+    }
+
+    .enhanced-select__button:focus-visible {
+      outline: none;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(26, 107, 60, 0.12);
+    }
+
+    .enhanced-select__button.is-placeholder {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .enhanced-select__button.is-invalid {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12);
+    }
+
+    .enhanced-select__value {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .enhanced-select__chevron {
+      flex: 0 0 auto;
+      width: 0.55rem;
+      height: 0.55rem;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: translateY(-2px) rotate(45deg);
+      transition: transform 0.15s ease;
+    }
+
+    .enhanced-select.is-open .enhanced-select__chevron {
+      transform: translateY(1px) rotate(-135deg);
+    }
+
+    .enhanced-select__panel {
+      position: absolute;
+      z-index: 20;
+      top: calc(100% + 0.45rem);
+      left: 0;
+      right: 0;
+      display: none;
+      max-height: min(18rem, 40vh);
+      overflow: auto;
+      padding: 0.35rem;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 16px 40px rgba(15, 69, 38, 0.14);
+    }
+
+    .enhanced-select.is-open .enhanced-select__panel {
+      display: block;
+    }
+
+    .enhanced-select__option {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      padding: 0.7rem 0.8rem;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: #0f172a;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 0.15s, color 0.15s;
+    }
+
+    .enhanced-select__option:hover,
+    .enhanced-select__option:focus-visible {
+      outline: none;
+      background: var(--green-light);
+      color: var(--green-dark);
+    }
+
+    .enhanced-select__option[aria-selected="true"] {
+      background: var(--green-dark);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .enhanced-select__option[data-placeholder="true"] {
+      color: var(--muted);
+    }
+
+    .enhanced-select__option:disabled {
+      color: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .enhanced-select__option:disabled:hover,
+    .enhanced-select__option:disabled:focus-visible {
+      background: transparent;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="brand">INEC <span>Delta</span> 2011</div>
+    <a href="/" {% if request.url.path == "/" %}class="active"{% endif %}>Polling Unit Results</a>
+    <a href="/lga-results" {% if request.url.path == "/lga-results" %}class="active"{% endif %}>LGA Totals</a>
+    <a href="/add-result" {% if request.url.path == "/add-result" %}class="active"{% endif %}>Add Results</a>
+  </nav>
+  <div class="page">
+    {% block content %}{% endblock %}
+  </div>
+  <script>
+    (() => {
+      const instances = [];
+      const formsWithValidation = new WeakSet();
+      let openInstance = null;
+
+      function closeInstance(instance, options = {}) {
+        if (!instance) return;
+        instance.wrapper.classList.remove('is-open');
+        instance.panel.hidden = true;
+        instance.button.setAttribute('aria-expanded', 'false');
+        if (openInstance === instance) {
+          openInstance = null;
+        }
+        if (options.focusButton) {
+          instance.button.focus({ preventScroll: true });
+        }
+      }
+
+      function openInstanceMenu(instance) {
+        if (openInstance && openInstance !== instance) {
+          closeInstance(openInstance);
+        }
+        instance.wrapper.classList.add('is-open');
+        instance.panel.hidden = false;
+        instance.button.setAttribute('aria-expanded', 'true');
+        openInstance = instance;
+
+        const selectedButton = instance.optionButtons.find((button) => button.dataset.value === instance.select.value && !button.disabled);
+        const firstChoiceButton = instance.optionButtons.find((button) => !button.disabled && button.dataset.value);
+        const firstButton = instance.optionButtons.find((button) => !button.disabled);
+        const targetButton = instance.required && !instance.select.value ? firstChoiceButton || firstButton : selectedButton || firstButton;
+
+        if (targetButton) {
+          requestAnimationFrame(() => targetButton.focus({ preventScroll: true }));
+        }
+      }
+
+      function syncInstance(instance) {
+        const selectedOption = instance.select.selectedOptions[0] || instance.select.options[0];
+        const isPlaceholder = !instance.select.value;
+
+        instance.value.textContent = selectedOption ? selectedOption.textContent.trim() : instance.placeholderText;
+        instance.button.classList.toggle('is-placeholder', isPlaceholder);
+        instance.button.classList.toggle('is-invalid', instance.invalid);
+        instance.button.setAttribute('aria-invalid', instance.invalid ? 'true' : 'false');
+
+        instance.optionButtons.forEach((button) => {
+          const selected = button.dataset.value === instance.select.value;
+          button.setAttribute('aria-selected', selected ? 'true' : 'false');
+        });
+      }
+
+      function moveFocus(instance, currentButton, direction) {
+        const enabledButtons = instance.optionButtons.filter((button) => !button.disabled);
+        const currentIndex = enabledButtons.indexOf(currentButton);
+        const nextIndex = currentIndex === -1 ? 0 : Math.max(0, Math.min(enabledButtons.length - 1, currentIndex + direction));
+        const target = enabledButtons[nextIndex];
+
+        if (target) {
+          target.focus({ preventScroll: true });
+        }
+      }
+
+      function buildSelect(select) {
+        if (!(select instanceof HTMLSelectElement) || select.dataset.enhancedBuilt === 'true') {
+          return;
+        }
+
+        const label = select.labels && select.labels.length ? select.labels[0] : null;
+        const form = select.form;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'enhanced-select';
+
+        select.parentNode.insertBefore(wrapper, select);
+        wrapper.appendChild(select);
+
+        const baseId = select.id || `enhanced-select-${instances.length + 1}`;
+        const valueId = `${baseId}-value`;
+        const listboxId = `${baseId}-listbox`;
+        const buttonId = `${baseId}-button`;
+
+        if (label) {
+          label.htmlFor = buttonId;
+        }
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'enhanced-select__button';
+        button.id = buttonId;
+        button.setAttribute('aria-haspopup', 'listbox');
+        button.setAttribute('aria-expanded', 'false');
+        button.setAttribute('aria-controls', listboxId);
+
+        const value = document.createElement('span');
+        value.className = 'enhanced-select__value';
+        value.id = valueId;
+
+        const chevron = document.createElement('span');
+        chevron.className = 'enhanced-select__chevron';
+        chevron.setAttribute('aria-hidden', 'true');
+
+        button.append(value, chevron);
+
+        const panel = document.createElement('div');
+        panel.className = 'enhanced-select__panel';
+        panel.id = listboxId;
+        panel.setAttribute('role', 'listbox');
+        panel.hidden = true;
+
+        const instance = {
+          select,
+          wrapper,
+          button,
+          value,
+          panel,
+          optionButtons: [],
+          placeholderText: select.options[0] ? select.options[0].textContent.trim() : 'Select an option',
+          required: select.required,
+          invalid: false,
+          form,
+        };
+
+        if (label) {
+          if (!label.id) {
+            label.id = `${baseId}-label`;
+          }
+          button.setAttribute('aria-labelledby', `${label.id} ${valueId}`);
+        } else {
+          button.setAttribute('aria-labelledby', valueId);
+        }
+
+        if (instance.required) {
+          button.setAttribute('aria-required', 'true');
+          select.removeAttribute('required');
+        }
+
+        select.hidden = true;
+        select.setAttribute('aria-hidden', 'true');
+        select.tabIndex = -1;
+        select.dataset.enhancedBuilt = 'true';
+
+        [...select.options].forEach((option, index) => {
+          const optionButton = document.createElement('button');
+          optionButton.type = 'button';
+          optionButton.className = 'enhanced-select__option';
+          optionButton.setAttribute('role', 'option');
+          optionButton.dataset.value = option.value;
+          optionButton.textContent = option.textContent.trim();
+          optionButton.disabled = option.disabled;
+
+          if (!option.value) {
+            optionButton.dataset.placeholder = 'true';
+          }
+
+          optionButton.addEventListener('click', () => {
+            if (optionButton.disabled) return;
+            select.value = option.value;
+            instance.invalid = false;
+            syncInstance(instance);
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            closeInstance(instance, { focusButton: true });
+          });
+
+          optionButton.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowDown') {
+              event.preventDefault();
+              moveFocus(instance, optionButton, 1);
+            } else if (event.key === 'ArrowUp') {
+              event.preventDefault();
+              if (index === 0) {
+                instance.button.focus({ preventScroll: true });
+              } else {
+                moveFocus(instance, optionButton, -1);
+              }
+            } else if (event.key === 'Home') {
+              event.preventDefault();
+              const firstEnabled = instance.optionButtons.find((button) => !button.disabled);
+              if (firstEnabled) {
+                firstEnabled.focus({ preventScroll: true });
+              }
+            } else if (event.key === 'End') {
+              event.preventDefault();
+              const lastEnabled = [...instance.optionButtons].reverse().find((button) => !button.disabled);
+              if (lastEnabled) {
+                lastEnabled.focus({ preventScroll: true });
+              }
+            } else if (event.key === 'Escape') {
+              event.preventDefault();
+              closeInstance(instance, { focusButton: true });
+            } else if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              optionButton.click();
+            }
+          });
+
+          panel.appendChild(optionButton);
+          instance.optionButtons.push(optionButton);
+        });
+
+        button.addEventListener('click', () => {
+          if (wrapper.classList.contains('is-open')) {
+            closeInstance(instance);
+          } else {
+            openInstanceMenu(instance);
+          }
+        });
+
+        button.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            closeInstance(instance, { focusButton: true });
+            return;
+          }
+
+          if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            if (!wrapper.classList.contains('is-open')) {
+              openInstanceMenu(instance);
+            }
+          } else if (event.key === 'ArrowUp' && !wrapper.classList.contains('is-open')) {
+            event.preventDefault();
+            openInstanceMenu(instance);
+            const lastEnabled = [...instance.optionButtons].reverse().find((button) => !button.disabled);
+            if (lastEnabled) {
+              lastEnabled.focus({ preventScroll: true });
+            }
+          }
+        });
+
+        wrapper.addEventListener('focusout', (event) => {
+          if (!wrapper.contains(event.relatedTarget)) {
+            closeInstance(instance);
+          }
+        });
+
+        select.addEventListener('change', () => {
+          instance.invalid = false;
+          syncInstance(instance);
+        });
+
+        if (form && !formsWithValidation.has(form)) {
+          formsWithValidation.add(form);
+          form.addEventListener('submit', (event) => {
+            const missing = instances.find((item) => item.form === form && item.required && !item.select.value);
+            if (missing) {
+              event.preventDefault();
+              missing.invalid = true;
+              syncInstance(missing);
+              openInstanceMenu(missing);
+            }
+          });
+        }
+
+        wrapper.append(button, panel);
+        wrapper.classList.add('enhanced-select--ready');
+        instances.push(instance);
+        syncInstance(instance);
+      }
+
+      document.querySelectorAll('select[data-enhanced-select]').forEach(buildSelect);
+
+      document.addEventListener('click', (event) => {
+        if (!openInstance) return;
+        if (!openInstance.wrapper.contains(event.target)) {
+          closeInstance(openInstance);
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && openInstance) {
+          closeInstance(openInstance, { focusButton: true });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

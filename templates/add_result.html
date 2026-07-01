@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Add Results{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Add Polling Unit Results</h1>
+  <p>Enter scores for all parties at a new polling unit. Leave a field blank to skip that party.</p>
+</div>
+
+{% if success %}
+  <div class="success-box">Results saved successfully. You may add another entry below.</div>
+{% endif %}
+
+{% if error %}
+  <div class="error-box">{{ error }}</div>
+{% endif %}
+
+<div class="card">
+  <form method="post" action="/add-result">
+    <label for="polling_unit_uniqueid">Select Polling Unit</label>
+    <select name="polling_unit_uniqueid" id="polling_unit_uniqueid" required data-enhanced-select>
+      <option value="">-- Choose a polling unit --</option>
+      {% for unit in polling_units %}
+        <option value="{{ unit.uniqueid }}" {% if selected_unit == unit.uniqueid|string %}selected{% endif %}>{{ unit.polling_unit_label }}</option>
+      {% endfor %}
+    </select>
+
+    <div style="margin-top: 1.5rem; margin-bottom: 0.5rem;">
+      <label style="margin-bottom: 0.75rem;">Party Scores</label>
+      <div class="party-grid">
+        {% for party in parties %}
+          <div class="party-input-group">
+            <label for="score_{{ party.party_abbreviation }}">{{ party.party_abbreviation }}</label>
+            <input
+              type="number"
+              id="score_{{ party.party_abbreviation }}"
+              name="score_{{ party.party_abbreviation }}"
+              min="0"
+              placeholder="0"
+            />
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <button type="submit" class="btn">Save Results</button>
+  </form>
+</div>
+{% endblock %}

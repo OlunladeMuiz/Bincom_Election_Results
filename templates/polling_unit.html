@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Polling Unit Results{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Polling Unit Results</h1>
+  <p>Select a polling unit to view individual party scores.</p>
+</div>
+
+<div class="card">
+  <form method="get" action="/">
+    <label for="unit_id">Select Polling Unit</label>
+    <select name="unit_id" id="unit_id" data-enhanced-select>
+      <option value="">-- Choose a polling unit --</option>
+      {% for unit in polling_units %}
+        <option value="{{ unit.uniqueid }}"
+          {% if request.query_params.get('unit_id') == unit.uniqueid|string %}selected{% endif %}>
+          {{ unit.polling_unit_label }}
+        </option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn">View Results</button>
+  </form>
+</div>
+
+{% if error %}
+  <div class="error-box">{{ error }}</div>
+{% endif %}
+
+{% if results %}
+  <div class="result-header">
+    <h2>{{ selected_unit }}</h2>
+    <span>{{ results | length }} parties</span>
+  </div>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table>
+      <thead>
+        <tr>
+          <th>Party</th>
+          <th>Votes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% set total = namespace(val=0) %}
+        {% for row in results %}
+          {% set total.val = total.val + row.party_score %}
+          <tr>
+            <td>{{ row.party_abbreviation }}</td>
+            <td>{{ "{:,}".format(row.party_score) }}</td>
+          </tr>
+        {% endfor %}
+        <tr class="total-row">
+          <td>TOTAL</td>
+          <td>{{ "{:,}".format(total.val) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}LGA Totals{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>LGA Summed Results</h1>
+  <p>Select a Local Government Area to view totals summed across all its polling units.</p>
+</div>
+
+<div class="card">
+  <form method="get" action="/lga-results">
+    <label for="lga_id">Select Local Government Area</label>
+    <select name="lga_id" id="lga_id" data-enhanced-select>
+      <option value="">-- Choose an LGA --</option>
+      {% for lga in lgas %}
+        <option value="{{ lga.lga_id }}"
+          {% if request.query_params.get('lga_id') == lga.lga_id|string %}selected{% endif %}>
+          {{ lga.lga_name }}
+        </option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn">View Totals</button>
+  </form>
+</div>
+
+{% if error %}
+  <div class="error-box">{{ error }}</div>
+{% endif %}
+
+{% if results %}
+  <div class="result-header">
+    <h2>{{ selected_lga }}</h2>
+    <span>Summed from all polling units</span>
+  </div>
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <table>
+      <thead>
+        <tr>
+          <th>Party</th>
+          <th>Total Votes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% set total = namespace(val=0) %}
+        {% for row in results %}
+          {% set total.val = total.val + row.total_score %}
+          <tr>
+            <td>{{ row.party_abbreviation }}</td>
+            <td>{{ "{:,}".format(row.total_score) }}</td>
+          </tr>
+        {% endfor %}
+        <tr class="total-row">
+          <td>TOTAL</td>
+          <td>{{ "{:,}".format(total.val) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+{% endblock %}
