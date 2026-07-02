@@ -818,6 +818,9 @@
             syncInstance(instance);
             select.dispatchEvent(new Event('change', { bubbles: true }));
             closeInstance(instance, { focusButton: true });
+            if (instance.form) {
+              instance.form.submit();
+            }
           });
 
           optionButton.addEventListener('keydown', (event) => {
