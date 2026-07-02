@@ -10,7 +10,7 @@
 <div class="card">
   <form method="get" action="/lga-results">
     <label for="lga_id">Select Local Government Area</label>
-    <select name="lga_id" id="lga_id" data-enhanced-select>
+    <select name="lga_id" id="lga_id" data-enhanced-select onchange="this.form.submit()">
       <option value="">-- Choose an LGA --</option>
       {% for lga in lgas %}
         <option value="{{ lga.lga_id }}"
