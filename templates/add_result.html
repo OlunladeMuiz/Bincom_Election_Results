@@ -21,7 +21,7 @@
     <select name="polling_unit_uniqueid" id="polling_unit_uniqueid" required data-enhanced-select>
       <option value="">-- Choose a polling unit --</option>
       {% for unit in polling_units %}
-        <option value="{{ unit.uniqueid }}" {% if selected_unit == unit.uniqueid|string %}selected{% endif %}>{{ unit.polling_unit_label }}</option>
+        <option value="{{ unit.uniqueid }}" {% if selected_unit and selected_unit|string == unit.uniqueid|string %}selected="selected"{% endif %}>{{ unit.polling_unit_label }}</option>
       {% endfor %}
     </select>
 
