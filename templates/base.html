@@ -793,6 +793,14 @@
           select.removeAttribute('required');
         }
 
+        // FIX: Read the 'selected' attribute from pre-rendered options before hiding the native select.
+        // This ensures that when the page reloads with a selected option from the template,
+        // the enhanced select displays the correct value instead of the placeholder.
+        const preselectedOption = [...select.options].find(opt => opt.hasAttribute('selected'));
+        if (preselectedOption && preselectedOption.value) {
+          select.value = preselectedOption.value;
+        }
+
         select.hidden = true;
         select.setAttribute('aria-hidden', 'true');
         select.tabIndex = -1;
