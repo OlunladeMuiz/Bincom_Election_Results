@@ -14,7 +14,7 @@
       <option value="">-- Choose a polling unit --</option>
       {% for unit in polling_units %}
         <option value="{{ unit.uniqueid }}"
-          {% if request.query_params.get('unit_id') == unit.uniqueid|string %}selected{% endif %}>
+          {% if request.query_params.get('unit_id') and request.query_params.get('unit_id')|string == unit.uniqueid|string %}selected="selected"{% endif %}>
           {{ unit.polling_unit_label }}
         </option>
       {% endfor %}
